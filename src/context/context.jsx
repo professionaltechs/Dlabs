@@ -79,7 +79,7 @@ const UserContextProvider = ({ children }) => {
         userTemp = value.data.user.user_metadata;
         console.log("supabase response", userTemp);
       }
-    });
+    })
     if (userTemp.provider_id) {
       const [firstResponse, secondResponse, thirdResponse] = await Promise.all([
         axios.get(`/api/users/970795810809868288`),

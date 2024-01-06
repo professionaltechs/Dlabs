@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../global/header/Header";
 import Home from "../sections/home/Home";
 import Services from "../sections/services/Services";
@@ -9,6 +9,9 @@ import About from "../sections/about/About";
 import MainFooter from "../global/footer/MainFooter";
 
 const Homepage = () => {
+  const [email, setEmail] = useState('')
+
+
   return (
     <>
       <Header />
