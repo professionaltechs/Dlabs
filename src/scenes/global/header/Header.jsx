@@ -1,33 +1,36 @@
-import * as React from "react";
-import logo from "../../../assets/logo.png";
+import React from "react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { HiMenu } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
-import { TbArrowBigUpFilled } from "react-icons/tb";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import frame from "../../../assets/frames/btn.png";
 import arrow from "../../../assets/frames/arrow.png";
-
 import "./header.css";
+import axios from "../../../axios/axios";
+import { useNavigate } from "react-router";
+
 const Header = () => {
   const [isMenu, setIsMenu] = useState(false);
   const [showTopButton, setShowTopButton] = useState(false);
   const [tab, setTab] = useState("");
-  const [open, setOpen] = React.useState(false);
-  const [loginModal, setLoginModal] = React.useState(true)
-  const [signUpModal, setSignUpModal] = React.useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = React.useState("")
+  const [open, setOpen] = useState(false);
+  const [loginModal, setLoginModal] = useState(true);
+  const [signUpModal, setSignUpModal] = useState(false);
+  const [emailLogin, setEmailLogin] = useState("");
+  const [emailSignup, setEmailSignup] = useState("");
+  const [passwordLogin, setPasswordLogin] = useState("");
+  const [passwordSignup, setPasswordSignup] = useState("");
+  const [dob, setDob] = useState("");
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
     });
   };
+
+  const navigate = useNavigate()
 
   const handleScroll = () => {
     if (window.scrollY > 700) setShowTopButton(true);
@@ -76,91 +79,41 @@ const Header = () => {
   };
 
   const handleOpen = () => {
-    setLoginModal(true)
-    setSignUpModal(false)
-    setOpen(true)
+    setLoginModal(true);
+    setSignUpModal(false);
+    setOpen(true);
   };
   const handleClose = () => {
-    setLoginModal(true)
-    setSignUpModal(false)
-    setOpen(false)
+    setLoginModal(true);
+    setSignUpModal(false);
+    setOpen(false);
   };
   const handleModalChange = () => {
-    setLoginModal(false)
-    setSignUpModal(true)
-  }
-
-  const handleLogin = () => {
-    console.log({ email, password });
-  }
-
-  const LoginModal = ({ open, onClose }) => {
-    return (
-
-      <Modal
-        open={open}
-        onClose={onClose}
-      >
-        <Box sx={style}>
-          <div style={{ position: "relative" }}>
-            <div className="frame-container">
-              <img src={frame} />
-              <button style={{ color: "red" }} onClick={onClose}>Close</button>
-              <div className="input-area">
-                <div className="email-input">
-                  <label htmlFor="loginEmail">Email:</label>
-                  <input type="email" name="loginEmail" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <div className="password-input">
-                  <label htmlFor="loginPassword">Password:</label>
-                  <input type="password" name="loginPassword" value={password} onChange={(e) => setPassword(e.target.value)} />
-                </div>
-                <button className="login-btn" onClick={handleLogin} >Login</button>
-                <p>New Here? <span onClick={handleModalChange}>Sign Up</span></p>
-              </div>
-            </div>
-          </div>
-        </Box>
-      </Modal>
-
-    );
+    setLoginModal(false);
+    setSignUpModal(true);
   };
 
-  const SignUpModal = ({ open, onClose }) => {
-    return (
-
-      <Modal
-        open={open}
-        onClose={onClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <div style={{ position: "relative" }}>
-            <div className="frame-container">
-              <img src={frame} />
-              <button style={{ color: "red" }} onClick={onClose}>Close</button>
-              <div className="input-area">
-                <div className="email-input">
-                  <label htmlFor="email">Email:</label>
-                  <input type="text" name="email" />
-                </div>
-                <div className="password-input">
-                  <label htmlFor="password">Password:</label>
-                  <input type="password" name="password" />
-                </div>
-                <div className="password-input">
-                  <label htmlFor="dob">Birthday:</label>
-                  <input type="date" name="dob" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </Box>
-      </Modal>
-
+  const handleLogin = async () => {
+    const loginBOdy = {
+      emailLogin,
+      passwordLogin,
+    };
+    const { data } = await axios.post(
+      "https://winwinsocietyweb3.com/api/auth/login",
+      {
+        loginBOdy,
+      }
     );
+    if (data.token) {
+      localStorage.setItem("token", data.token)
+      navigate("/dashboard")
+    } else {
+      alert("Error Fetching Token")
+    }
+  };
+
+  const handleSignUp = () => {
+    console.log({ emailSignup, passwordSignup, dob });
   };
 
   return (
@@ -220,14 +173,101 @@ const Header = () => {
           <a href="#footer" className="header__desktop__btn">
             Contact us
           </a>
+
+          {/* modal for login / signup */}
+
           <a className="header__desktop__btn" onClick={handleOpen}>
             Login/Signup
           </a>
         </div>
       </header>
+      {loginModal && (
+        <Modal open={open} onClose={handleClose}>
+          <Box sx={style}>
+            <div style={{ position: "relative" }}>
+              <div className="frame-container">
+                <img src={frame} />
+                <button style={{ color: "red" }} onClick={handleClose}>
+                  Close
+                </button>
+                <div className="input-area">
+                  <div className="email-input">
+                    <label htmlFor="loginEmail">Email:</label>
+                    <input
+                      type="email"
+                      name="loginEmail"
+                      value={emailLogin}
+                      onChange={(e) => setEmailLogin(e.target.value)}
+                    />
+                  </div>
+                  <div className="password-input">
+                    <label htmlFor="loginPassword">Password:</label>
+                    <input
+                      type="password"
+                      name="loginPassword"
+                      value={passwordLogin}
+                      onChange={(e) => setPasswordLogin(e.target.value)}
+                    />
+                  </div>
+                  <button className="login-btn" onClick={handleLogin}>
+                    Login
+                  </button>
+                  <p>
+                    New Here? <span onClick={handleModalChange}>Sign Up</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Box>
+        </Modal>
+      )}
 
-      {loginModal && <LoginModal open={open} onClose={handleClose} />}
-      {signUpModal && <SignUpModal open={open} onClose={handleClose} />}
+      {signUpModal && (
+        <Modal open={open} onClose={handleClose}>
+          <Box sx={style}>
+            <div style={{ position: "relative" }}>
+              <div className="frame-container">
+                <img src={frame} />
+                <button style={{ color: "red" }} onClick={handleClose}>
+                  Close
+                </button>
+                <div className="input-area">
+                  <div className="email-input">
+                    <label htmlFor="email">Email:</label>
+                    <input
+                      type="text"
+                      name="email"
+                      value={emailSignup}
+                      onChange={(e) => setEmailSignup(e.target.value)}
+                    />
+                  </div>
+                  <div className="password-input">
+                    <label htmlFor="password">Password:</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={passwordSignup}
+                      onChange={(e) => setPasswordSignup(e.target.value)}
+                    />
+                  </div>
+                  <div className="password-input">
+                    <label htmlFor="dob">Birthday:</label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                    />
+                  </div>
+                  <button className="signup-btn" onClick={handleSignUp}>
+                    Sign Up
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Box>
+        </Modal>
+      )}
     </>
   );
 };
