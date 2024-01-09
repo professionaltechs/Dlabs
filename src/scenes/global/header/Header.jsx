@@ -23,6 +23,7 @@ const Header = () => {
   const [passwordLogin, setPasswordLogin] = useState("");
   const [passwordSignup, setPasswordSignup] = useState("");
   const [loginStatus, setLoginStatus] = useState(false);
+  const [keepTrack, setKeepTrack] = useState(false);
   const [dob, setDob] = useState("");
 
   const scrollToTop = () => {
@@ -143,7 +144,9 @@ const Header = () => {
         }
       } else if (error.response.status === 401 && originalRequest._retry) {
         removeTokens();
-        navigate("/");
+        if (!keepTrack) {
+          navigate("/");
+        }
       }
 
       return Promise.reject(error);
@@ -151,7 +154,6 @@ const Header = () => {
   );
 
   const handleLogin = async () => {
-    setLoginModal(true)
     try {
       const loginBody = {
         email: emailLogin,
@@ -163,25 +165,29 @@ const Header = () => {
         loginBody
       );
 
-      if (data && data.token) {
-
+      if (data.token) {
+        // setLoginStatus(true)
         console.log("Login successful");
         saveAccessToken(data.token);
         saveRefreshToken(data.refreshToken);
-        setLoginModal(false)
-        console.log(loginStatus);
+
+        setEmailLogin("");
+        setPasswordLogin("");
+
+        setKeepTrack(true);
+        setLoginModal(false);
       } else {
         console.error("Error: No token received");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      alert("Error during login");
+      // alert("Error during login");
     }
   };
 
   const handleLogout = () => {
     removeTokens();
-    setLoginStatus(false);
+    setKeepTrack(false)
     alert("Logout Successfully");
   };
 
@@ -213,15 +219,14 @@ const Header = () => {
     }
   };
 
-  useEffect(() => {
-    const access_token = localStorage.getItem("accessToken")
-    if (access_token) {
-      setLoginStatus(true)
-    } else {
-      setLoginStatus(false)
-    }
-  }, [loginStatus])
-
+  // useEffect(() => {
+  //   const access_token = localStorage.getItem("accessToken");
+  //   if (access_token) {
+  //     setKeepTrack(true);
+  //   } else {
+  //     setKeepTrack(false);
+  //   }
+  // }, [keepTrack]);
 
   return (
     <>
@@ -282,15 +287,17 @@ const Header = () => {
           </a>
 
           {/* modal for login / signup */}
-          {!loginStatus ? (
+          {keepTrack ? (
             <a className="header__desktop__btn" onClick={handleLogout}>
               Logout
             </a>
-          ) : (<a className="header__desktop__btn" onClick={handleLogin}>
-            Login/Signup
-          </a>)}
+          ) : (
+            <a className="header__desktop__btn" onClick={handleOpen}>
+              Login/Signup
+            </a>
+          )}
         </div>
-      </header >
+      </header>
       {loginModal && (
         <Modal open={open} onClose={handleClose}>
           <Box sx={style}>
@@ -330,57 +337,54 @@ const Header = () => {
             </div>
           </Box>
         </Modal>
-      )
-      }
+      )}
 
-      {
-        signUpModal && (
-          <Modal open={open} onClose={handleClose}>
-            <Box sx={style}>
-              <div style={{ position: "relative" }}>
-                <div className="frame-container">
-                  <img src={frame} />
-                  <button style={{ color: "red" }} onClick={handleClose}>
-                    Close
-                  </button>
-                  <div className="input-area">
-                    <div className="email-input">
-                      <label htmlFor="email">Email:</label>
-                      <input
-                        type="text"
-                        name="email"
-                        value={emailSignup}
-                        onChange={(e) => setEmailSignup(e.target.value)}
-                      />
-                    </div>
-                    <div className="password-input">
-                      <label htmlFor="password">Password:</label>
-                      <input
-                        type="password"
-                        name="password"
-                        value={passwordSignup}
-                        onChange={(e) => setPasswordSignup(e.target.value)}
-                      />
-                    </div>
-                    <div className="password-input">
-                      <label htmlFor="dob">Birthday:</label>
-                      <input
-                        type="date"
-                        name="dob"
-                        value={dob}
-                        onChange={(e) => setDob(e.target.value)}
-                      />
-                    </div>
-                    <button className="signup-btn" onClick={handleSignUp}>
-                      Sign Up
-                    </button>
+      {signUpModal && (
+        <Modal open={open} onClose={handleClose}>
+          <Box sx={style}>
+            <div style={{ position: "relative" }}>
+              <div className="frame-container">
+                <img src={frame} />
+                <button style={{ color: "red" }} onClick={handleClose}>
+                  Close
+                </button>
+                <div className="input-area">
+                  <div className="email-input">
+                    <label htmlFor="email">Email:</label>
+                    <input
+                      type="text"
+                      name="email"
+                      value={emailSignup}
+                      onChange={(e) => setEmailSignup(e.target.value)}
+                    />
                   </div>
+                  <div className="password-input">
+                    <label htmlFor="password">Password:</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={passwordSignup}
+                      onChange={(e) => setPasswordSignup(e.target.value)}
+                    />
+                  </div>
+                  <div className="password-input">
+                    <label htmlFor="dob">Birthday:</label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                    />
+                  </div>
+                  <button className="signup-btn" onClick={handleSignUp}>
+                    Sign Up
+                  </button>
                 </div>
               </div>
-            </Box>
-          </Modal>
-        )
-      }
+            </div>
+          </Box>
+        </Modal>
+      )}
     </>
   );
 };
